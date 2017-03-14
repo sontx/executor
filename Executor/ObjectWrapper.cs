@@ -1,4 +1,4 @@
-﻿namespace SonTx.Utils.Executor
+﻿namespace Sontx.Utils.Executor
 {
     internal class ObjectWrapper<T>
     {

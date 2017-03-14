@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SonTx.Utils.Executor
+namespace Sontx.Utils.Executor
 {
     public sealed class ProcessExecutor
     {

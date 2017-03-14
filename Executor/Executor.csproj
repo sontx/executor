@@ -7,8 +7,8 @@
     <ProjectGuid>{E91C506A-FDDC-402A-B0BC-E0E64EBFE0EB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SonTx.Utils.Executor</RootNamespace>
-    <AssemblyName>SonTx.Utils</AssemblyName>
+    <RootNamespace>Sontx.Utils.Executor</RootNamespace>
+    <AssemblyName>Sontx.Utils.Executor</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

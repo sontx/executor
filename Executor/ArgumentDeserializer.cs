@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace SonTx.Utils.Executor
+namespace Sontx.Utils.Executor
 {
     public sealed class ArgumentDeserializer
     {
