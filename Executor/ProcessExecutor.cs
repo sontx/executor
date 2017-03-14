@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SonTx.Utils.Executor
 {
@@ -38,8 +39,28 @@ namespace SonTx.Utils.Executor
 
         public void Execute()
         {
+            var process = CreateProcess();
+            process.Dispose();
+        }
+
+        public Task ExecuteAndWaitAsync(int milliseconds = -1)
+        {
+            return Task.Run(() =>
+            {
+                using (var process = CreateProcess())
+                {
+                    if (milliseconds < 0)
+                        process.WaitForExit();
+                    else
+                        process.WaitForExit(milliseconds);
+                }
+            });
+        }
+
+        private Process CreateProcess()
+        {
             var tempFile = SerializeArgumentsToFile();
-            Process.Start(ExecutableFilePath, "\"" + tempFile + "\"");
+            return Process.Start(ExecutableFilePath, "\"" + tempFile + "\"");
         }
 
         private void CheckDuplicateKey(string key)
