@@ -59,6 +59,11 @@ namespace Sontx.Utils.Executor
             return argument.ToObject<ObjectWrapper<T>>().Value;
         }
 
+        public bool Contains(string key)
+        {
+            return objectArguments.Any((arg) => { return arg.ToObject<ObjectWrapper<object>>().Key == key; });
+        }
+
         private void DeserializeArguments(string tempFile)
         {
             string json = File.ReadAllText(tempFile);
