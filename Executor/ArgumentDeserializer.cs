@@ -4,12 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Collections;
 
 namespace Sontx.Utils.Executor
 {
-    public sealed class ArgumentDeserializer
+    public sealed class ArgumentDeserializer : IEnumerable<object>
     {
-        private IList<JObject> objectArguments { get; set; }
+        private IList<JObject> objectArguments = null;
         private readonly string[] commandLineArguments = null;
 
         public bool DeleteTempFileOnDeserialized { get; set; } = true;
@@ -68,6 +69,19 @@ namespace Sontx.Utils.Executor
         {
             string json = File.ReadAllText(tempFile);
             objectArguments = JsonConvert.DeserializeObject<IList<JObject>>(json);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<object> GetEnumerator()
+        {
+            foreach (var jObject in objectArguments)
+            {
+                yield return jObject.ToObject<ObjectWrapper<object>>().Value;
+            }
         }
     }
 }
