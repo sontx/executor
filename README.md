@@ -1,0 +1,27 @@
+#Executor Utils
+You can pass multiple arguments that can be complex objects to another program while executing that program from an executable file.
+#Install
+To install Executor, run the following command in the [Package Manager Console](https://docs.nuget.org/docs/start-here/using-the-package-manager-console)
+
+    Install-Package Sontx.Utils.Executor 
+#Usage
+**From caller:**
+
+    var executor = new ProcessExecutor("another.exe");
+    executor.Add("person1", new Person() { Name = "tran xuan son", Age = 23 });
+    executor.Add(new Person() { Name = "tran xuan soan", Age = 24 });
+    executor.Add("myDog", new Dog() { CoatColor = "black", Type = "i don't know" });
+    executor.Add("some string");
+    executor.Add(3393);
+    executor.Execute();
+**From another program:**
+
+    var deserializer = new ArgumentDeserializer();
+    if (deserializer.Deserialize())
+    {
+        var person1 = deserializer.GetArgument<Person>("person1");
+        var person2 = deserializer.GetArgument<Person>(1);
+        var myDog = deserializer.GetArgument<Dog>("myDog");
+        var myString = deserializer.GetArgument<string>(3);
+        var myCode = deserializer.GetArgument<int>(4);
+    }
