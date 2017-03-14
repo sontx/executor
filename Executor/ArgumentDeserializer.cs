@@ -1,19 +1,24 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections;
 
 namespace Sontx.Utils.Executor
 {
     public sealed class ArgumentDeserializer : IEnumerable<object>
     {
-        private IList<JObject> objectArguments = null;
+        private ExecutingSession<JObject> executingSession = null;
+
         private readonly string[] commandLineArguments = null;
 
+        public string SessionKey { get { return executingSession.SessionKey; } }
+
         public bool DeleteTempFileOnDeserialized { get; set; } = true;
+
+        public bool IsDeserialized { get; private set; } = false;
 
         public ArgumentDeserializer(string[] arguments)
         {
@@ -36,7 +41,7 @@ namespace Sontx.Utils.Executor
 
             try
             {
-                DeserializeArguments(tempFile);
+                DeserializeExecutingSession(tempFile);
             }
             catch
             {
@@ -46,29 +51,31 @@ namespace Sontx.Utils.Executor
             if (DeleteTempFileOnDeserialized)
                 File.Delete(tempFile);
 
+            IsDeserialized = true;
+
             return true;
         }
 
         public T GetArgument<T>(int index)
         {
-            return objectArguments[index].ToObject<ObjectWrapper<T>>().Value;
+            return executingSession.Arguments[index].ToObject<ObjectWrapper<T>>().Value;
         }
 
         public T GetArgument<T>(string key)
         {
-            JObject argument = objectArguments.Single((arg) => { return arg.ToObject<ObjectWrapper<object>>().Key == key; });
+            JObject argument = executingSession.Arguments.Single((arg) => { return arg.ToObject<ObjectWrapper<object>>().Key == key; });
             return argument.ToObject<ObjectWrapper<T>>().Value;
         }
 
         public bool Contains(string key)
         {
-            return objectArguments.Any((arg) => { return arg.ToObject<ObjectWrapper<object>>().Key == key; });
+            return executingSession.Arguments.Any((arg) => { return arg.ToObject<ObjectWrapper<object>>().Key == key; });
         }
 
-        private void DeserializeArguments(string tempFile)
+        private void DeserializeExecutingSession(string tempFile)
         {
             string json = File.ReadAllText(tempFile);
-            objectArguments = JsonConvert.DeserializeObject<IList<JObject>>(json);
+            executingSession = JsonConvert.DeserializeObject<ExecutingSession<JObject>>(json);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -78,7 +85,7 @@ namespace Sontx.Utils.Executor
 
         public IEnumerator<object> GetEnumerator()
         {
-            foreach (var jObject in objectArguments)
+            foreach (var jObject in executingSession.Arguments)
             {
                 yield return jObject.ToObject<ObjectWrapper<object>>().Value;
             }

@@ -41,9 +41,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgumentDeserializer.cs" />
+    <Compile Include="ClientProcess.cs" />
+    <Compile Include="ExecutingSession.cs" />
     <Compile Include="ObjectWrapper.cs" />
     <Compile Include="ProcessExecutor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protocol\IObjectTransmitter.cs" />
+    <Compile Include="Protocol\PipelineClientTransmitter.cs" />
+    <Compile Include="Protocol\PipelineServerTransmitter.cs" />
+    <Compile Include="Protocol\StreamObjectTransmitter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

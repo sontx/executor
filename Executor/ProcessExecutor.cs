@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Sontx.Utils.Executor.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,17 +11,41 @@ namespace Sontx.Utils.Executor
 {
     public sealed class ProcessExecutor
     {
+        private IObjectTransmitter _transmitter = null;
+
+        public IObjectTransmitter Transmitter
+        {
+            get
+            {
+                if (_transmitter == null)
+                {
+                    ValidSessionKey();
+                    _transmitter = new PipelineServerTransmitter(SessionKey);
+                }
+                return _transmitter;
+            }
+        }
+
         public string ExecutableFilePath { get; set; }
 
-        private IList<ObjectWrapper<object>> objectWrapperArguments = new List<ObjectWrapper<object>>();
+        public string SessionKey
+        {
+            get { return executingSession.SessionKey; }
+            set { executingSession.SessionKey = value; }
+        }
+
+        private ExecutingSession<ObjectWrapper<object>> executingSession;
 
         public ProcessExecutor(string executableFilePath)
+            : this()
         {
             this.ExecutableFilePath = executableFilePath;
         }
 
         public ProcessExecutor()
         {
+            executingSession = new ExecutingSession<ObjectWrapper<object>>();
+            executingSession.Arguments = new List<ObjectWrapper<object>>();
         }
 
         public void Add(object argument)
@@ -34,24 +59,24 @@ namespace Sontx.Utils.Executor
                 key = GenerateKey();
             else
                 CheckDuplicateKey(key);
-            objectWrapperArguments.Add(new ObjectWrapper<object>() { Value = argument, Key = key });
+            executingSession.Arguments.Add(new ObjectWrapper<object>() { Value = argument, Key = key });
         }
 
         public void RemoveAt(int index)
         {
-            objectWrapperArguments.RemoveAt(index);
+            executingSession.Arguments.RemoveAt(index);
         }
 
         public bool Remove(object argument)
         {
-            var argumentObject = objectWrapperArguments.Single((obj) => { return obj.Value == argument; });
-            return argumentObject != null ? objectWrapperArguments.Remove(argumentObject) : false;
+            var argumentObject = executingSession.Arguments.Single((obj) => { return obj.Value == argument; });
+            return argumentObject != null ? executingSession.Arguments.Remove(argumentObject) : false;
         }
 
         public bool RemoveByKey(string key)
         {
-            var argumentObject = objectWrapperArguments.Single((obj) => { return obj.Key == key; });
-            return argumentObject != null ? objectWrapperArguments.Remove(argumentObject) : false;
+            var argumentObject = executingSession.Arguments.Single((obj) => { return obj.Key == key; });
+            return argumentObject != null ? executingSession.Arguments.Remove(argumentObject) : false;
         }
 
         public void Execute()
@@ -76,13 +101,13 @@ namespace Sontx.Utils.Executor
 
         private Process CreateProcess()
         {
-            var tempFile = SerializeArgumentsToFile();
+            var tempFile = SerializeExecutingSessionToFile();
             return Process.Start(ExecutableFilePath, "\"" + tempFile + "\"");
         }
 
         private void CheckDuplicateKey(string key)
         {
-            if (objectWrapperArguments.Any((arg) => { return arg.Key == key; }))
+            if (executingSession.Arguments.Any((arg) => { return arg.Key == key; }))
                 throw new ArgumentException("Key is Duplicated.");
         }
 
@@ -91,9 +116,16 @@ namespace Sontx.Utils.Executor
             return Guid.NewGuid().ToString();
         }
 
-        private string SerializeArgumentsToFile()
+        private void ValidSessionKey()
         {
-            string json = JsonConvert.SerializeObject(objectWrapperArguments);
+            if (string.IsNullOrEmpty(executingSession.SessionKey))
+                executingSession.SessionKey = GenerateKey();
+        }
+
+        private string SerializeExecutingSessionToFile()
+        {
+            ValidSessionKey();
+            string json = JsonConvert.SerializeObject(executingSession);
             string tempFile = Path.GetTempFileName();
             File.WriteAllText(tempFile, json);
             return tempFile;
