@@ -37,6 +37,23 @@ namespace Sontx.Utils.Executor
             objectWrapperArguments.Add(new ObjectWrapper<object>() { Value = argument, Key = key });
         }
 
+        public void RemoveAt(int index)
+        {
+            objectWrapperArguments.RemoveAt(index);
+        }
+
+        public bool Remove(object argument)
+        {
+            var argumentObject = objectWrapperArguments.Single((obj) => { return obj.Value == argument; });
+            return argumentObject != null ? objectWrapperArguments.Remove(argumentObject) : false;
+        }
+
+        public bool RemoveByKey(string key)
+        {
+            var argumentObject = objectWrapperArguments.Single((obj) => { return obj.Key == key; });
+            return argumentObject != null ? objectWrapperArguments.Remove(argumentObject) : false;
+        }
+
         public void Execute()
         {
             var process = CreateProcess();
