@@ -5,6 +5,10 @@ To install Executor, run the following command in the [Package Manager Console](
 
     Install-Package Sontx.Utils.Executor 
 #Usage
+
+Just want to pass some arguments!
+---------------------------------
+
 **From caller:**
 
     var executor = new ProcessExecutor("another.exe");
@@ -24,4 +28,27 @@ To install Executor, run the following command in the [Package Manager Console](
         var myDog = deserializer.GetArgument<Dog>("myDog");
         var myString = deserializer.GetArgument<string>(3);
         var myCode = deserializer.GetArgument<int>(4);
+    }
+
+And communicate with another
+----------------------------
+**From caller:**
+
+    var executor = new ProcessExecutor("another.exe");
+    executor.Add("something", "your arguments");
+    executor.Execute();
+    
+    executor.Transmitter.PrepareAsync().Wait();
+    executor.Transmitter.Send("I'm busy, what do you want to tell me!");
+**From another program:**
+        
+    var clientProcess = new ClientProcess();
+    if (clientProcess.Deserialize())
+    {
+        var deserializer = clientProcess.Deserializer;
+        var something = deserializer.GetArgument<string>("something");
+        
+        clientProcess.Transmitter.PrepareAsync().Wait();
+        var message = clientProcess.Transmitter.Receive<string>();
+        clientProcess.Transmitter.Send("Ahihi, I love you ;)");
     }
